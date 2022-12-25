@@ -63,5 +63,4 @@
   */
  #define OV7670_ReadReg(BaseAddress, RegOffset) 					Xil_In32((BaseAddress) + (RegOffset))
 
-
 #endif // OV7670_HW_H

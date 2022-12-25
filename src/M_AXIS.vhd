@@ -3,19 +3,19 @@
 -- Engineer:            Daniel Kampert
 -- 
 -- Create Date:         01.03.2021 12:45:22
--- Design Name:
+-- Design Name:         
 -- Module Name:         M_AXIS - M_AXIS_Arch
 -- Project Name:        OV7670
--- Target Devices:
+-- Target Devices:      
 -- Tool Versions:       Vivado 2022.2
 -- Description:         AXI-Stream master interface for the OV7670 image sensor interface.
 -- 
--- Dependencies:
+-- Dependencies:        
 -- 
 -- Revision:            0.01 - File Created
 --                      1.00 - Initial release
 --
--- Additional Comments:
+-- Additional Comments: 
 -- 
 ----------------------------------------------------------------------------------
 

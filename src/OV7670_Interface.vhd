@@ -3,19 +3,19 @@
 -- Engineer:            Daniel Kampert
 -- 
 -- Create Date:         01.03.2021 12:45:22
--- Design Name: 
+-- Design Name:         
 -- Module Name:         OV7670_Interface - OV7670_Interface_Arch
 -- Project Name:        OV7670
--- Target Devices:
+-- Target Devices:      
 -- Tool Versions:       Vivado 2022.2
 -- Description:         OV7670 image sensor interface to capture 16 bit RGB 565 data from the image sensor.
 -- 
--- Dependencies:
+-- Dependencies:        
 -- 
 -- Revision:            0.01 - File Created
 --                      1.00 - Initial release
 --
--- Additional Comments:
+-- Additional Comments: 
 -- 
 ----------------------------------------------------------------------------------
 
@@ -33,7 +33,7 @@ use IEEE.NUMERIC_STD.ALL;
 
 entity OV7670_Interface is
     Generic (
-        DATA_FORMATED   : BOOLEAN := true                                                   -- Format the output data to use them with a Xilinx AXI-Stream Video DMA
+        C_DATA_FORMATED : BOOLEAN := true                                                   -- Format the output data to use them with a Xilinx AXI-Stream Video DMA
         );
     Port (
         -- Control interface
@@ -55,7 +55,7 @@ end OV7670_Interface;
 
 architecture OV7670_Interface_Arch of OV7670_Interface is
 
-    type OV7670_State_t     is (STATE_WAIT_FOR_LINE_START, STATE_RECEIVE_DATA);
+    type OV7670_State_t is (STATE_WAIT_FOR_LINE_START, STATE_RECEIVE_DATA);
 
     signal FIFO_WE_Reg          : STD_LOGIC                                         := '0';
     signal FIFO_Data_Reg        : STD_LOGIC_VECTOR(15 downto 0)                     := (others => '0');
@@ -81,7 +81,7 @@ begin
 
             -- Start to receive the data after a VSYNC has been detected and when HREF is asserted
             when STATE_RECEIVE_DATA =>
-                FIFO_Data_Reg(7 downto 0) <= FIFO_Data_Reg(15 downto 8);
+                FIFO_Data_Reg(15 downto 8) <= FIFO_Data_Reg(7 downto 0);
          
                 if((HREF = '1') and (BytesReceived < 1)) then
                     BytesReceived <= BytesReceived + 1;
@@ -97,28 +97,28 @@ begin
     end process;
 
     --
-    FIFO_Data_Reg(15 downto 8) <= D;
-         
+    FIFO_Data_Reg(7 downto 0) <= D;
+
     -- FIFO Write Enable
     -- The signal gets asserted when two data bytes from the camera were received
     FIFO_WE <= '1' when (BytesReceived = 1) else '0';
 
-    Unformated_Data : if(DATA_FORMATED = false) generate
+    Unformated_Data : if(C_DATA_FORMATED = false) generate
         FIFO_Data <= "00000000" & FIFO_Data_Reg when (HREF = '1') else (others => '0');
     end generate;
 
-    Formated_Data : if(DATA_FORMATED = true) generate
+    Formated_Data : if(C_DATA_FORMATED = true) generate
         -- Remap the color from the camera layout to the Video DMA layout
         -- The camera transmit the colors as 16 bit value:
-        --  Byte 0: 7 - 3 Red, 2 - 0 Green (highest bits)
+        --  Byte 0: 6 - 2 Red, 1 - 0 Green (highest bits)
         --  Byte 1: 7 - 5 Green, 4 - 0 Blue
         -- The DMA receives the colors as 24 bit value:
         --  Byte 2: Red
         --  Byte 1: Blue
         --  Byte 0: Green
-        FIFO_Data <= ("000" & FIFO_Data_Reg(10 downto 11) & 
-                      "000" & FIFO_Data_Reg(4 downto 0) & 
-                      "00" & FIFO_Data_Reg(15 downto 5))
+        FIFO_Data <= ("000" & FIFO_Data_Reg(4 downto 0) &
+                      "000" & FIFO_Data_Reg(15 downto 11) &
+                      "00" & FIFO_Data_Reg(10 downto 5))
                       when (HREF = '1') else (others => '0');
     end generate;
 

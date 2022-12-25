@@ -3,19 +3,19 @@
 -- Engineer:            Daniel Kampert
 -- 
 -- Create Date:         01.03.2021 12:45:22
--- Design Name:
+-- Design Name:         
 -- Module Name:         OV7670 - OV7670_Arch
 -- Project Name:        OV7670
--- Target Devices:
+-- Target Devices:      
 -- Tool Versions:       Vivado 2022.2
 -- Description:         AXI-Stream OV7670 sensor interface top layer module.
 -- 
--- Dependencies:
+-- Dependencies:        
 -- 
--- Revision:             0.01 - File Created
+-- Revision:            0.01 - File Created
 --                      1.00 - Initial release
 --
--- Additional Comments:
+-- Additional Comments: 
 -- 
 ----------------------------------------------------------------------------------
 
