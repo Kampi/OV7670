@@ -347,7 +347,7 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>f0c125e1</spirit:value>
+            <spirit:value>5b90ee27</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -372,7 +372,7 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>f0c125e1</spirit:value>
+            <spirit:value>5b90ee27</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -1011,6 +1011,12 @@
         <spirit:userFileType>CELL_NAME_Sync_FIFO</spirit:userFileType>
       </spirit:file>
       <spirit:file>
+        <spirit:name>src/OV7670/OV7670_Constants.vhd</spirit:name>
+        <spirit:fileType>vhdlSource</spirit:fileType>
+        <spirit:userFileType>IMPORTED_FILE</spirit:userFileType>
+        <spirit:logicalName>OV7670</spirit:logicalName>
+      </spirit:file>
+      <spirit:file>
         <spirit:name>src/M_AXIS.vhd</spirit:name>
         <spirit:fileType>vhdlSource</spirit:fileType>
         <spirit:userFileType>IMPORTED_FILE</spirit:userFileType>
@@ -1074,6 +1080,11 @@
         <spirit:userFileType>xci</spirit:userFileType>
         <spirit:userFileType>IMPORTED_FILE</spirit:userFileType>
         <spirit:userFileType>CELL_NAME_Sync_FIFO</spirit:userFileType>
+      </spirit:file>
+      <spirit:file>
+        <spirit:name>src/OV7670/OV7670_Constants.vhd</spirit:name>
+        <spirit:fileType>vhdlSource</spirit:fileType>
+        <spirit:userFileType>IMPORTED_FILE</spirit:userFileType>
       </spirit:file>
       <spirit:file>
         <spirit:name>src/M_AXIS.vhd</spirit:name>
@@ -1225,13 +1236,13 @@
       </xilinx:xpmLibraries>
       <xilinx:vendorURL>https://www.kampis-elektroecke.de</xilinx:vendorURL>
       <xilinx:coreRevision>8</xilinx:coreRevision>
-      <xilinx:coreCreationDateTime>2022-12-25T11:43:51Z</xilinx:coreCreationDateTime>
+      <xilinx:coreCreationDateTime>2022-12-25T15:37:47Z</xilinx:coreCreationDateTime>
     </xilinx:coreExtensions>
     <xilinx:packagingInfo>
       <xilinx:xilinxVersion>2022.2</xilinx:xilinxVersion>
       <xilinx:checksum xilinx:scope="busInterfaces" xilinx:value="536a5476"/>
       <xilinx:checksum xilinx:scope="memoryMaps" xilinx:value="1bdd2282"/>
-      <xilinx:checksum xilinx:scope="fileGroups" xilinx:value="5a3f896a"/>
+      <xilinx:checksum xilinx:scope="fileGroups" xilinx:value="ebfb95cb"/>
       <xilinx:checksum xilinx:scope="ports" xilinx:value="320eeba0"/>
       <xilinx:checksum xilinx:scope="hdlParameters" xilinx:value="efcc9ea1"/>
       <xilinx:checksum xilinx:scope="parameters" xilinx:value="6b6ebd37"/>

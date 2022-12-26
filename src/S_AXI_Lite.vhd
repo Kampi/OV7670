@@ -10,11 +10,12 @@
 -- Tool Versions:       Vivado 2022.2
 -- Description:         AXI Lite slave interface for the image sensor configuration interface.
 -- 
--- Dependencies:
+-- Dependencies:        
 -- 
 -- Revision:            0.01 - File Created
 --                      1.00 - Initial release
--- Additional Comments:
+--
+-- Additional Comments: 
 -- 
 ----------------------------------------------------------------------------------
 
@@ -29,6 +30,9 @@ use IEEE.NUMERIC_STD.ALL;
 -- any Xilinx leaf cells in this code.
 --library UNISIM;
 --use UNISIM.VComponents.all;
+
+library OV7670;
+use OV7670.Constants.all;
 
 entity S_AXI_Lite is
 	Generic (  C_S_AXI_DATA_WIDTH	: INTEGER	:= 32;
@@ -63,14 +67,6 @@ entity S_AXI_Lite is
 end S_AXI_Lite;
 
 architecture S_AXI_Lite_Arch of S_AXI_Lite is
-    constant VERSION_MAJOR      : INTEGER   := 1;
-    constant VERSION_MINOR      : INTEGER   := 0;
-
-	-- Example-specific design signals
-	-- local parameter for addressing 32 bit / 64 bit C_S_AXI_DATA_WIDTH
-	-- ADDR_LSB is used for addressing 32/64 bit registers/memories
-	-- ADDR_LSB = 2 for 32 bits (n downto 2)
-	-- ADDR_LSB = 3 for 64 bits (n downto 3)
     constant ADDR_LSB           : INTEGER   := (C_S_AXI_DATA_WIDTH / 32) + 1;
     constant OPT_MEM_ADDR_BITS  : INTEGER   := 1;
 
@@ -86,28 +82,18 @@ architecture S_AXI_Lite_Arch of S_AXI_Lite is
     signal axi_awaddr           : STD_LOGIC_VECTOR((C_S_AXI_ADDR_WIDTH - 1) downto 0);
 
     signal Reg_Version          : STD_LOGIC_VECTOR((C_S_AXI_DATA_WIDTH - 1) downto 0)   := STD_LOGIC_VECTOR(to_unsigned(VERSION_MAJOR, C_S_AXI_DATA_WIDTH / 2)) & STD_LOGIC_VECTOR(to_unsigned(VERSION_MINOR, C_S_AXI_DATA_WIDTH / 2));
-    signal Reg_Config           : STD_LOGIC_VECTOR((C_S_AXI_DATA_WIDTH - 1) downto 0)   := x"00000001";
+    signal Reg_Config           : STD_LOGIC_VECTOR((C_S_AXI_DATA_WIDTH - 1) downto 0)   := (OV7670_BIT_RESET => '1', others => '0');
     signal slv_reg2	            : STD_LOGIC_VECTOR((C_S_AXI_DATA_WIDTH - 1) downto 0);
     signal slv_reg3	            : STD_LOGIC_VECTOR((C_S_AXI_DATA_WIDTH - 1) downto 0);
 
     signal slv_reg_rden	        : STD_LOGIC;
     signal slv_reg_wren	        : STD_LOGIC;
     signal reg_data_out	        : STD_LOGIC_VECTOR((C_S_AXI_DATA_WIDTH - 1) downto 0);
-    signal aw_en                : STD_LOGIC;
+    signal aw_en                : STD_LOGIC; 
 
     signal byte_index           : INTEGER;
 
 begin
-
-    -- Signal assignment
-	S_AXI_AWREADY  <= axi_awready;
-	S_AXI_WREADY   <= axi_wready;
-	S_AXI_BRESP	   <= axi_bresp;
-	S_AXI_BVALID   <= axi_bvalid;
-	S_AXI_ARREADY  <= axi_arready;
-	S_AXI_RDATA	   <= axi_rdata;
-	S_AXI_RRESP	   <= axi_rresp;
-	S_AXI_RVALID   <= axi_rvalid;
 
 	-- Implement axi_awready generation
 	-- axi_awready is asserted for one S_AXI_ACLK clock cycle when both
@@ -137,23 +123,6 @@ begin
 	    end if;
 	end process;
 
-	-- Implement axi_awaddr latching
-	-- This process is used to latch the address when both
-	-- S_AXI_AWVALID and S_AXI_WVALID are valid.
-	process
-	begin
-        wait until rising_edge(S_AXI_ACLK);
-
-	    if((axi_awready = '0') and (S_AXI_AWVALID = '1') and (S_AXI_WVALID = '1') and (aw_en = '1')) then
-	        -- Write Address latching
-            axi_awaddr <= S_AXI_AWADDR;
-        end if;
-
-	    if(S_AXI_ARESETN = '0') then
-            axi_awaddr <= (others => '0');
-	    end if;
-	end process; 
-
 	-- Implement axi_wready generation
 	-- axi_wready is asserted for one S_AXI_ACLK clock cycle when both
 	-- S_AXI_AWVALID and S_AXI_WVALID are asserted. axi_wready is 
@@ -177,6 +146,23 @@ begin
 	    end if;
 	end process;
 
+	-- Implement axi_awaddr latching
+	-- This process is used to latch the address when both
+	-- S_AXI_AWVALID and S_AXI_WVALID are valid.
+	process
+	begin
+        wait until rising_edge(S_AXI_ACLK);
+
+	    if((axi_awready = '0') and (S_AXI_AWVALID = '1') and (S_AXI_WVALID = '1') and (aw_en = '1')) then
+	        -- Write Address latching
+            axi_awaddr <= S_AXI_AWADDR;
+        end if;
+
+	    if(S_AXI_ARESETN = '0') then
+            axi_awaddr <= (others => '0');
+	    end if;
+	end process; 
+
 	-- Implement memory mapped register select and write logic generation
 	-- The write data is accepted and written to memory mapped registers when
 	-- axi_awready, S_AXI_WVALID, axi_wready and S_AXI_WVALID are asserted. Write strobes are used to
@@ -198,24 +184,24 @@ begin
                     for byte_index in 0 to ((C_S_AXI_DATA_WIDTH / 8) - 1) loop
                         if(S_AXI_WSTRB(byte_index) = '1') then
                             -- Respective byte enables are asserted as per write strobes                   
-                            -- slave registor 1
-                            Reg_Config(byte_index*8+7 downto byte_index*8) <= S_AXI_WDATA(byte_index*8+7 downto byte_index*8);
+                            -- slave register 1
+                            Reg_Config(((byte_index * 8) + 7) downto (byte_index * 8)) <= S_AXI_WDATA(((byte_index * 8) + 7) downto (byte_index * 8));
                         end if;
                     end loop;
                 when b"10" =>
                     for byte_index in 0 to ((C_S_AXI_DATA_WIDTH / 8) - 1) loop
                         if(S_AXI_WSTRB(byte_index) = '1') then
                             -- Respective byte enables are asserted as per write strobes                   
-                            -- slave registor 2
-                            slv_reg2(byte_index*8+7 downto byte_index*8) <= S_AXI_WDATA(byte_index*8+7 downto byte_index*8);
+                            -- slave register 2
+                            slv_reg2(((byte_index * 8) + 7) downto (byte_index * 8)) <= S_AXI_WDATA(((byte_index * 8) + 7) downto (byte_index * 8));
                         end if;
                     end loop;
                 when b"11" =>
                     for byte_index in 0 to ((C_S_AXI_DATA_WIDTH / 8) - 1) loop
                         if(S_AXI_WSTRB(byte_index) = '1') then
                             -- Respective byte enables are asserted as per write strobes                   
-                            -- slave registor 3
-                            slv_reg3(byte_index*8+7 downto byte_index*8) <= S_AXI_WDATA(byte_index*8+7 downto byte_index*8);
+                            -- slave register 3
+                            slv_reg3(((byte_index * 8) + 7) downto (byte_index * 8)) <= S_AXI_WDATA(((byte_index * 8) + 7) downto (byte_index * 8));
                         end if;
                     end loop;
                 when others =>
@@ -314,7 +300,7 @@ begin
         variable loc_addr : STD_LOGIC_VECTOR(OPT_MEM_ADDR_BITS downto 0);
 	begin
 	    -- Address decoding for reading registers
-	    loc_addr := axi_araddr(ADDR_LSB + OPT_MEM_ADDR_BITS downto ADDR_LSB);
+	    loc_addr := axi_araddr((ADDR_LSB + OPT_MEM_ADDR_BITS) downto ADDR_LSB);
 
 	    case loc_addr is
             when b"00" =>
@@ -349,5 +335,13 @@ begin
     end process;
 
 	Config_Reg <= Reg_Config;
+	S_AXI_AWREADY  <= axi_awready;
+	S_AXI_WREADY   <= axi_wready;
+	S_AXI_BRESP	   <= axi_bresp;
+	S_AXI_BVALID   <= axi_bvalid;
+	S_AXI_ARREADY  <= axi_arready;
+	S_AXI_RDATA	   <= axi_rdata;
+	S_AXI_RRESP	   <= axi_rresp;
+	S_AXI_RVALID   <= axi_rvalid;
 
 end S_AXI_Lite_Arch;

@@ -40,7 +40,7 @@ entity OV7670_Control is
                );
 	Port (
         -- OV7670 register interface
-        OV7670_Reg_Enable   : out STD_LOGIC;                                                -- REGISTER CONTROL OUTPUT: Enable signal for the camera sensor.
+        OV7670_Reg_Enable   : out STD_LOGIC;                                                -- REGISTER CONTROL OUTPUT: Enable signal for the camera sensor interface.
         OV7670_Reg_nRESET   : out STD_LOGIC;                                                -- REGISTER CONTROL OUTPUT: Reset signal for the OV7670 camera sensor.
         OV7670_Reg_PWDN     : out STD_LOGIC;                                                -- REGISTER CONTROL OUTPUT: Power-Down signal for the OV7670 camera sensor.
 

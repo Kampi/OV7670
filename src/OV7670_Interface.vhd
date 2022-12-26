@@ -33,23 +33,23 @@ use IEEE.NUMERIC_STD.ALL;
 
 entity OV7670_Interface is
     Generic (
-        C_DATA_FORMATED : BOOLEAN := true                                                   -- Format the output data to use them with a Xilinx AXI-Stream Video DMA
+        C_DATA_FORMATED : BOOLEAN := true                                                   -- Format the output data to use them with a Xilinx AXI-Stream Video DMA.
         );
     Port (
         -- Control interface
         nReset          : in STD_LOGIC;                                                     -- CONTROL INPUT:
-        Enable          : in STD_LOGIC;                                                     -- CONTROL INPUT:
+        Enable          : in STD_LOGIC;                                                     -- CONTROL INPUT: Enable signal for the receiver.
 
         -- OV7670 interface
-        PCLK            : in STD_LOGIC;                                                     -- CAMERA INPUT: Pixel clock from the camera sensor
-        VSYNC           : in STD_LOGIC;                                                     -- CAMERA INPUT: VSYNC from the camera sensor
-        HREF            : in STD_LOGIC;                                                     -- CAMERA INPUT: HREF from the camera sensor
-        D               : in STD_LOGIC_VECTOR(7 downto 0);                                  -- CAMERA INPUT: Pixel data from the camera sensor
+        PCLK            : in STD_LOGIC;                                                     -- CAMERA INPUT: Pixel clock from the camera sensor.
+        VSYNC           : in STD_LOGIC;                                                     -- CAMERA INPUT: VSYNC from the camera sensor.
+        HREF            : in STD_LOGIC;                                                     -- CAMERA INPUT: HREF from the camera sensor.
+        D               : in STD_LOGIC_VECTOR(7 downto 0);                                  -- CAMERA INPUT: Pixel data from the camera sensor.
 
         -- FIFO interface
-        FIFO_Full       : in STD_LOGIC;                                                     -- FIFO INPUT: FIFO full control signal
-        FIFO_Data       : out STD_LOGIC_VECTOR(23 downto 0);                                -- FIFO OUTPUT: Pixel data for the FIFO
-        FIFO_WE         : out STD_LOGIC                                                     -- FIFO OUTPUT: Write enable signal for the FIFO
+        FIFO_Full       : in STD_LOGIC;                                                     -- FIFO INPUT: FIFO full control signal.
+        FIFO_Data       : out STD_LOGIC_VECTOR(23 downto 0);                                -- FIFO OUTPUT: Pixel data for the FIFO.
+        FIFO_WE         : out STD_LOGIC                                                     -- FIFO OUTPUT: Write enable signal for the FIFO.
         );
 end OV7670_Interface;
 
@@ -66,6 +66,7 @@ architecture OV7670_Interface_Arch of OV7670_Interface is
 
 begin
 
+    -- State machine for data reading.
     process
     begin
         wait until falling_edge(PCLK);
@@ -104,7 +105,7 @@ begin
     FIFO_WE <= '1' when (BytesReceived = 1) else '0';
 
     Unformated_Data : if(C_DATA_FORMATED = false) generate
-        FIFO_Data <= "00000000" & FIFO_Data_Reg when (HREF = '1') else (others => '0');
+        FIFO_Data <= "00000000" & FIFO_Data_Reg when ((HREF = '1') and (nRESET = '1')) else (others => '0');
     end generate;
 
     Formated_Data : if(C_DATA_FORMATED = true) generate
@@ -116,10 +117,10 @@ begin
         --  Byte 2: Red
         --  Byte 1: Blue
         --  Byte 0: Green
-        FIFO_Data <= ("000" & FIFO_Data_Reg(4 downto 0) &
-                      "000" & FIFO_Data_Reg(15 downto 11) &
+        FIFO_Data <= ("000" & FIFO_Data_Reg(15 downto 11) &
+                      "000" & FIFO_Data_Reg(4 downto 0) &
                       "00" & FIFO_Data_Reg(10 downto 5))
-                      when (HREF = '1') else (others => '0');
+                      when ((HREF = '1') and (nRESET = '1')) else (others => '0');
     end generate;
 
 end OV7670_Interface_Arch;
